@@ -1,0 +1,15 @@
+{
+  "name": "talk-hotjar-monolith",
+  "version": "1.0.0",
+  "description": "Talk on how to break apart a monolithic application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bob Gregory",
+  "license": "CC-BY-SA-4.0",
+  "dependencies": {
+    "reveal.js": "^4.1.3",
+    "sass": "^1.43.4"
+  }
+}

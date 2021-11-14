@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+   <meta charset="UTF-8">
+
+   <script type="text/javascript" src="/node_modules/reveal.js/dist/reveal.js"></script>
+   <script type="text/javascript" src="/node_modules/reveal.js/plugin/notes/notes.js"></script>
+   <script type="text/javascript" src="/node_modules/reveal.js/plugin/markdown/markdown.js"></script>
+   <link rel="stylesheet" href="/node_modules/reveal.js/dist/reveal.css">
+   <link rel="stylesheet" href="/node_modules/reveal.js/dist/theme/serif.css">
+   <link rel="stylesheet" href="/static/style.css">
+  </head>
+
+  <body>
+    <div class="reveal">
+        <div class="slides">
+          <section data-markdown="talk.md"
+                   data-separator="^---"
+                   data-separator-vertical="^--">
+              </section>
+            </div>
+    </div>
+
+<script>
+// More info about initialization & config:
+// - https://revealjs.com/initialization/
+// - https://revealjs.com/config/
+Reveal.initialize({
+hash: true,
+display: "grid",
+
+// Learn about plugins: https://revealjs.com/plugins/
+plugins: [ RevealMarkdown, RevealNotes ]
+});
+
+const imgs = document.getElementsByTagName("img")  
+  console.log(imgs, "wtf", imgs.length)
+  for (var i = 0; i < imgs.length; i ++) {
+      console.log("wat")
+  }
+imgs.forEach( function( image ) {
+    console.log("wat")
+    
+} );
+
+  console.log(imgs, "wtf", imgs.length)
+</script>
+  </body>
+</html>
