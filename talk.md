@@ -2,15 +2,13 @@
 
 ---
 ## Who am I?
-<!-- .slide: class="columnar l-2" -->
 ![bob](static/img/me.jpg)
 
-I'm Bob - husband, dad, and software architect, currently working for _Cazoo_.
+I'm Bob - husband, dad, and software architect, currently working for Cazoo.
 
 Notes: This is me, I'm Bob. This picture was drawn by my son. Disturbingly, at some point he'd crossed out the word "mummy" and replaced it with "daddy". I presume it was the beard.
 
 --
-<!-- .slide: class="columnar l-2 has-footer" -->
 ### Who am I?
 
 Me and my mate Harry done a book!
@@ -22,6 +20,7 @@ You can read it for nowt at [CosmicPython.com](https://www.cosmicpython.com/)
 Notes: It's obligatory for me to promote the book that I wrote with Harry. You can read that on the internets, you don't have to pay any money or anything, but it talks a lot more about some of the things we'll discuss today.
 
 --
+### Fight me
 
 - Twitter: @bob_the_mighty
 - Github : github.com/bobthemighty
@@ -64,7 +63,6 @@ In a monolith, we have one big blob of stuff. That means you only have one thing
 The trade-off is that internally, monoliths can grow very complex and, over time, that can cause us problems.
 
 ---
-<!-- .slide: class="columnar l-2 has-footer" -->
 ## Systems are complex
 
 We're in the business of building _systems_
@@ -86,7 +84,6 @@ Note: Neural networks, in the machine learning sense, are another great example.
 
 --
 ### Systems are complex
-<!-- .slide: class="columnar l-2 has-footer" -->
 
 ![Adult male internal organs](https://upload.wikimedia.org/wikipedia/commons/b/b0/Adult_male_with_organs.png)
 
@@ -210,7 +207,7 @@ Note: I don't know of any sane way to extract a service out of a monolith that d
 In each of the three examples, I'm going to explain a little bit about the system to give the context for why we wanted to move it out of a monolithic system, and I'll give you a quick guide to _how_ we did it. At the end of this talk, hopefully, you'll have some new ideas about how to tackle breaking things up if you encounter these problems in your own organisations.
 
 ---
-# The .Net Banian Tree <!-- .element: class="frosted" -->
+# The .Net Banyan Tree <!-- .element: class="frosted" -->
 <!-- .slide: data-background="./static/img/banyan.jpg" -->
 
 Note: The first system I want to talk about is the one we talk about at the end of the book. It was a .Net monolith that I worked on at a company called Huddle. This system was originally built by a consultancy, and they'd actually done a pretty good job, but they'd taken advantage of features in .Net that make it easy to build something quickly at the cost of maintainability.
@@ -291,11 +288,35 @@ DocumentService, and a MarkDocumentApproved command, and all of them let you
 approve a document, but each was written in a different way and replicated the
 same behaviour. It was a big mess.
 
+Eventually we founkd an architect who knew what he was doing and he described
+this as a Banyan Tree architecture. I've never heard the term anywhere else so
+I suspect he made it up BUT
 
+The Banyan tree is a kind of fig. Birds eat the seeds and they poop them out
+of the sky. Sometimes those seeds fall on the branches of a tree and they
+start to grow. They put down these long roots from the branches of the tree
+down to the ground, and then they start to grow around the host tree.
+
+Ovre time, the Banyan plant puts out its own branches, and those branches have
+roots, too. Eventually the host tree is completely surrounded by the parasitic
+plant.
+
+Likewise, we had tried to solve our problem by layering more and more complexity
+on top of the old codebase, like a banyan, enveloping the old mess but note
+tackling it.
 
 ---
 <!-- .slide: data-background="./static/img/snowflakes.jpg" -->
-Not every part of your system is special <!-- .element: class="frosted" -->
+Not every part of your system is special <!-- .element: class="frosted light" -->
+
+Notes: The first part of fixing this problem, with a big horrible codebase,
+is to understand that not all of your code is important. Not all of your code
+can be beautiful. Some of it is going to be crap, because you're in a hurry and
+you only have limited attention.
+
+What you need to do is work out which parts of your system are most important
+to the business, and focus on extracting and solidifying those. To do that we
+used an exercise called the Product alignment matrix, which looks like this:
 
 --
 ## Finding the core domain
@@ -349,7 +370,7 @@ separate documents out into its own service.
 
 ---
 <!-- .slide: data-background="./static/img/shattered-glass-window-1490304513ROy.jpg" -->
-# Strategy: Smash and Grab <!-- .element: class="frosted" -->
+# Strategy: Smash and Grab <!-- .element: class="frosted light" -->
 
 Notes: We used a strategy that I'm calling Smash and Grab. Think of architecture like
 planning a robbery on a jewellery store. Usually, you want to use a stealth
@@ -382,14 +403,16 @@ To this...
 Notes: This, where we have two databases, and two web applications, and two APIs and so on. How do you do this? If you have thie problem with horrible complexity and poor performance, and you want to extract part of your code, but it's all tangled up and interdependent, what's the magic trick?
 
 --
+![Copy paste](static/img/copy-paste.gif)
 
-<!-- .slide: data-background="./static/img/copy-paste.gif" -->
 
 Notes: The basic technique to do this is copy and paste. Step 1 is that we literally
 took a copy of the database and a copy of the source code. I fired up a new
 version of the application on my laptop, and then we started deleting code. 
 
 --
+#### Remove the unused code
+
 ![monolithic architecture](static/img/delete-code.png)
 
 Notes: We'd got acceptance tests that talked to the documents api, so after every change I'd
@@ -405,6 +428,8 @@ It's important to remember that in this step we're not changing the documents
 code itself, we're just pruning all the things around it.
 
 --
+#### Use messaging to replicate data
+
 ![Messaging for data replication](static/img/replication.png)
 
 Notes: Messaging for data replication (two systems, messages flow between)
@@ -414,6 +439,8 @@ service. When I try to access a document that's in a deleted workspace, I should
 an error.
 
 --
+#### Why messaging, not API calls?
+
 ![Chained API Calls](static/img/chained-api.png)
 
 Notes: Naively, you might do this through API integration. When someone requests document
@@ -421,6 +448,7 @@ Notes: Naively, you might do this through API integration. When someone requests
 then make a request to the workspaces API to check the state of that workspace.
 
 --
+#### Synchronous calls propagate failure
 
 ![Error propagation](static/img/chained-api-broken.png)
 
@@ -429,6 +457,8 @@ or has an outage, then my Documents API will _also_ misbehave. By coupling these
 two things at runtime, we reduce our reliability.
 
 --
+#### The more calls you make, the worse your reliability
+
 ![API Call Fan-out](static/img/api-explosion.png)
 
 Notes: The second problem is that in order to figure out if you can access a file, we
@@ -442,14 +472,16 @@ can see how this quickly reduces performance and reliability.
 #### Looks familiar...
 ![monolithic architecture](static/img/monolith.png)
 
+Avoid the distributed monolith!
+
 Notes: In fact, if you go this route, you'll quickly find that you're reproducing this
 exact design again, but with a slow and unreliable network connection instead of
 in-memory function calls. that's not an improvement.
 --
+#### Cache data locally to avoid synchronous calls
 
 ![Messaging for data replication](static/img/replication.png)
 
-Documents event listener
 
 Notes: Instead, we want to cache the data locally, so that we can always return an
 answer quickly.
@@ -585,7 +617,7 @@ doesn't help you very much if you want to rewrite into Rust or something since i
 focused on separating the data.
 
 ---
-<!-- .slide: data-background="./static/img/container-ship.jpg" -->
+<!-- .slide: class="frosted" data-background="./static/img/container-ship.jpg" -->
 # Availability Service
 
 Notes: The second example I want to look at is the availability service that we wrote
@@ -596,6 +628,8 @@ going to skim over the problem we're trying to solve.
 #### Problem Domain
 
 ![Floating stock](static/img/floating-stock.png)
+
+Made.com sells furniture.
 
 It takes a long time to get goods from the supplier
 
@@ -649,7 +683,7 @@ predicting demand and at counting where everything is.
 --
 ### The Duolith
 
-![The Duolith](static/img/the-duolith.png)
+![The Duolith](static/img/duolith.png)
 
 Notes: The duolith
 I arrived at MADE.com in 2014. At that time, they had what I affectionately call
@@ -677,8 +711,9 @@ Christmas, it took more than 24 hours to synchronise a day's orders.
 --
 ### High potential for customer annoyance
 
-![The Duolith](static/img/allocation-error.png)
+![Allocation failures](static/img/allocation-error.pngInvest in observability )
 
+If we get it wrong, delivery dates are incorrect.
 
 Notes: That's worse than it sounds, because we have this allocation model. Customers
 will come to our website to buy a chair and we'll say Great! We can ship you
@@ -704,7 +739,7 @@ due to performance problems.
 
 ---
 <!-- .slide: data-background="./static/img/Delphi.jpg" -->
-# Strategy: Build an Oracle
+# Strategy: Build an Oracle <!-- .element class="frosted light" -->
 
 [Zde](https://upload.wikimedia.org/wikipedia/commons/a/a3/Oracle_of_Delphi%2C_red-figure_kylix%2C_440-430_BC%2C_Kodros_Painter%2C_Berlin_F_2538%2C_141668.jpg), ![CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) via Wikimedia Commons
 
@@ -725,6 +760,9 @@ question.
 #### Target Architecture
 
 ![Availability Target Architecture](static/img/availability.png)
+
+
+Build a new API that answers questions about delivery times
 
 Notes: Target architecture
 This is, of course, the availability service, which was the focus of the book.
@@ -750,7 +788,7 @@ code. I dont' remember what the first test was, but it was maybe something like
 
 --
 #### Use TDD to build a model
-```
+```python
 def when_allocating_an_order_to_a_batch():
 
     order = Order(qty=1)
@@ -773,7 +811,7 @@ big to fit the batch".
 --
 #### More tests!
 
-```
+```python
 def when_the_batch_is_too_small():
     pass
     
@@ -843,7 +881,7 @@ This lets us focus on the core problem - how long will it take us to deliver a
 chair to your house, and not get side-tracked by infrastructural questions.
 
 --
-<!-- .slide: data-background="./static/img/walking-skeleton.jpg" -->
+<!-- .slide: data-background="./static/img/walking-skeleton.jpg" class="frosted" -->
 ## Deploy a Walking Skeleton
 
 Notes: At some point we need to start thinking about how to get into production.
@@ -903,7 +941,7 @@ Jenkins, and working out how to use Ansible.
 
 --
 <!-- .slide: data-background="./static/img/fmri.png" -->
-## Invest in observability
+## Invest in observability <!-- .element class="frosted light" -->
 
 Notes: Probably the biggest lesson I learned from this project was the value of
 observability. Observability is the ability to look inside a system and 
@@ -939,7 +977,7 @@ It is useless for observing your system and asking questions.
 
 --
 #### Structured Logging through Filters
-```
+```python
 class MessageFilter(logging.Filter):
 
     def __init__(self, bus):
@@ -1131,8 +1169,8 @@ read-only view. That made it much less risky than if we'd tried to replace some
 of the other parts of the ERP system. 
 
 --
-<!-- .slide: data-background="./static/img/scaffolding.jpg" class="frosted" -->
-# Replacing the shop front
+<!-- .slide: data-background="./static/img/scaffolding.jpg" -->
+# Replacing the shop front <!-- .element  class="frosted light"  -->
 
 
 Notes: The last example I want to talk about is also from MADE.com. I'm not ready to share
@@ -1344,10 +1382,9 @@ and progressive technology. The people who do stick with it, in London at least,
 tend to be consultants who get paid extremely well for working with software that
 they intensely dislike. Magento 1.0 is the COBOL of e-commerce platforms.
 
---
 ---
 <!-- .slide: data-background="./static/img/snowflakes.jpg" -->
-Remember! Not every part of your system is special <!-- .element: class="frosted" -->
+Remember! Not every part of your system is special <!-- .element: class="frosted light" -->
 
 Notes: That said, Magento does a LOT of stuff that you don't want to write for
 yourself. Tax calculations, special offers, discount codes, adding things to
@@ -1421,7 +1458,7 @@ data, and makes it easy for us to group, sort and aggregate thousands of JSON
 objects so it's a nice fit for our problem.
 
 --
-### Step 1 - Proxy
+### Step 1 - Proxy the old service
 ```
 var http = require('http'),
     httpProxy = require('http-proxy');
@@ -1547,4 +1584,3 @@ If you DO need your new application to share data with the old monolith then, on
 
 ---
 # Questions?
---

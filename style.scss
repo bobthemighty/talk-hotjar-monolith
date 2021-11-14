@@ -32,9 +32,14 @@
 .reveal .frosted {
  background-color: rgba(255, 255, 255, .15);
  backdrop-filter: blur(5px);
- mix-blend-mode: color-burn;
- color: #333;
-  text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+.reveal .light {
+  color: #DDD;
+}
+
+.reveal .slide-background-content {
+  background-position: top;
 }
 
 .single-image {

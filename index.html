@@ -5,12 +5,14 @@
    <meta charset="UTF-8">
 
    <script type="text/javascript" src="/node_modules/reveal.js/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
    <script type="text/javascript" src="/node_modules/reveal.js/plugin/notes/notes.js"></script>
    <script type="text/javascript" src="/node_modules/reveal.js/plugin/markdown/markdown.js"></script>
    <link rel="stylesheet" href="/node_modules/reveal.js/dist/reveal.css">
-   <link rel="stylesheet" href="/node_modules/reveal.js/dist/theme/serif.css">
+   <link rel="stylesheet" href="/node_modules/reveal.js/dist/theme/simple.css">
    <link rel="stylesheet" href="/static/style.css">
-  </head>
+<link rel="stylesheet" href="/static/stackoverflow-light.css">
+<script src="/node_modules/reveal.js/plugin/highlight/highlight.js"></script>  </head>
 
   <body>
     <div class="reveal">
@@ -26,25 +28,37 @@
 // More info about initialization & config:
 // - https://revealjs.com/initialization/
 // - https://revealjs.com/config/
+
+renderer = new marked.Renderer;
+renderer.paragraph = function(text) {
+    if (text.startsWith('<figure') && text.endsWith('</figure>'))
+        return text;
+    else
+        return '<p>' + text + '</p>';
+}
+
+renderer.image = function (href, title, alt) {
+  var out = '<figure class="stretch">';
+  out += '<img src="' + href + '" alt="' + alt + '">';
+  if (title) {
+    out += '<figcaption>' + title + '</figcaption>';
+  }
+  out += '</figure>';
+  return out;
+};
+
+ 
 Reveal.initialize({
 hash: true,
 display: "grid",
+markdown: {
+  renderer
+},
 
 // Learn about plugins: https://revealjs.com/plugins/
-plugins: [ RevealMarkdown, RevealNotes ]
+  plugins: [ RevealMarkdown, RevealNotes, RevealHighlight ]
 });
 
-const imgs = document.getElementsByTagName("img")  
-  console.log(imgs, "wtf", imgs.length)
-  for (var i = 0; i < imgs.length; i ++) {
-      console.log("wat")
-  }
-imgs.forEach( function( image ) {
-    console.log("wat")
-    
-} );
-
-  console.log(imgs, "wtf", imgs.length)
 </script>
   </body>
 </html>
